@@ -25,6 +25,7 @@ app.use( '/uploads', express.static('uploads'));
 
 app.use((req, res, next) => {
     app.locals.isLogin = true;
+    app.locals.req_path = req.path;     // req.path : express에서 현재 URL을 보여주는 변수
     next();
 })
 
