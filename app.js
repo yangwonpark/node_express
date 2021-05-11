@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const nunjucks = require('nunjucks');
 const logger = require('morgan');
+// const bodyParser = require('body-parser');      //express 자체 내장 모듈이므로 별도 설치 불필요
 
 const admin = require('./routes/admin');
 const port = 3000;
@@ -14,6 +15,17 @@ nunjucks.configure('template', {
 
 // 미들웨어 셋팅
 app.use( logger('dev'));
+// app.use( bodyParser.json());
+// app.use( bodyParser.urlencoded({ extended : false}));
+app.use(express.urlencoded());
+app.use(express.json());
+
+// app.use( (req, res, next) => {
+//     req.body = {
+
+//     }
+// });
+
 
 app.get('/', (req, res) => {
     res.send('express start');
