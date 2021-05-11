@@ -23,6 +23,10 @@ app.use(express.json());
 // uploads 폴더 안의 모든 정적파일을 불러옴
 app.use( '/uploads', express.static('uploads'));
 
+app.use((req, res, next) => {
+    app.locals.isLogin = true;
+    next();
+})
 
 app.get('/', (req, res) => {
     res.send('express start');
