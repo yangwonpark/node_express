@@ -20,11 +20,8 @@ app.use( logger('dev'));
 app.use(express.urlencoded());
 app.use(express.json());
 
-// app.use( (req, res, next) => {
-//     req.body = {
-
-//     }
-// });
+// uploads 폴더 안의 모든 정적파일을 불러옴
+app.use( '/uploads', express.static('uploads'));
 
 
 app.get('/', (req, res) => {
