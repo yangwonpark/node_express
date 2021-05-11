@@ -1,7 +1,25 @@
 const express = require('express');
 const router = express.Router();
 
-router.get('/', (req, res) => {
+function testMiddleware( req, res, next) {
+    console.log('첫번째 미들웨어');
+    next();     // 작업을 다음으로 넘겨줌
+}
+
+function testMiddleware2( req, res, next) {
+    console.log('두번째 미들웨어');
+    next();
+}
+
+// function loginRequired(req, res, next) {
+//     if(로그인 X) {
+        
+//     } else {
+//         next();
+//     }
+// }
+
+router.get('/', testMiddleware, testMiddleware2, (req, res) => {
     res.send('admin 이후 url');
 });
 

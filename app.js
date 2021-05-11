@@ -1,9 +1,9 @@
 const express = require('express');
 const app = express();
 const nunjucks = require('nunjucks');
+const logger = require('morgan');
 
 const admin = require('./routes/admin');
-const contacts = require('./routes/contacts');
 const port = 3000;
 
 // template 폴더 (view파일 path를 적어줌)
@@ -12,13 +12,21 @@ nunjucks.configure('template', {
     express : app               // 위에서 선언한 express()를 담은 변수
 });
 
+// 미들웨어 셋팅
+app.use( logger('dev'));
 
 app.get('/', (req, res) => {
     res.send('express start');
 });
 
-app.use('/admin', admin);
-app.use('/contacts', contacts);
+// admin 이하의 모든 경로에서 작동하는 미들웨어
+function vipMiddleware(req, res, next) {
+    console.log('최우선 미들웨어');
+    next();
+}
+
+// admin 이하 모든 경로를 잡아감
+app.use('/admin', vipMiddleware, admin);
 
 app.listen(port, () => {
     console.log('Express Listening on port', port);
