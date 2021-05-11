@@ -1,56 +1,74 @@
 const express = require('express');
-const app = express();
 const nunjucks = require('nunjucks');
 const logger = require('morgan');
-// const bodyParser = require('body-parser');      //express 자체 내장 모듈이므로 별도 설치 불필요
+const bodyParser = require('body-parser');
 
-const admin = require('./routes/admin');
-const port = 3000;
+class App {
+    constructor() {
+        this.app = express();
 
-// template 폴더 (view파일 path를 적어줌)
-nunjucks.configure('template', {
-    autoescape : true,          // false로 사용 시, html 태그가 작동이 되어 보안상 위험하다 => html부분에서 | safe를 붙여주면 부분 허용 가능
-    express : app               // 위에서 선언한 express()를 담은 변수
-});
+        // 뷰엔진 세팅
+        this.setViewEngine();
 
-// 미들웨어 셋팅
-app.use( logger('dev'));
-// app.use( bodyParser.json());
-// app.use( bodyParser.urlencoded({ extended : false}));
-app.use(express.urlencoded());
-app.use(express.json());
+        // 미들웨어 세팅
+        this.setMiddleWare();
 
-// uploads 폴더 안의 모든 정적파일을 불러옴
-app.use( '/uploads', express.static('uploads'));
+        // 정적 디렉토리 추가
+        this.setStatic();
 
-app.use((req, res, next) => {
-    app.locals.isLogin = true;
-    app.locals.req_path = req.path;     // req.path : express에서 현재 URL을 보여주는 변수
-    next();
-})
+        // 로컬 변수
+        this.setLocals();
 
-app.get('/', (req, res) => {
-    res.send('express start');
-});
+        // 라우팅
+        this.getRouting();
 
-// admin 이하의 모든 경로에서 작동하는 미들웨어
-function vipMiddleware(req, res, next) {
-    console.log('최우선 미들웨어');
-    next();
+        // 404
+        this.status404();
+
+        // 에러처리
+        this.errorHandler();
+    }
+
+    setViewEngine() {
+        nunjucks.configure('template', {
+            autoescape: true,
+            express: this.app
+        });
+    }
+
+    setMiddleWare() {
+        this.app.use(logger('dev'));
+        this.app.use(express.json());
+        this.app.use(express.urlencoded());
+    }
+
+    setStatic() {
+        this.app.use('/uploads', express.static('uploads'));
+    }
+
+    setLocals() {
+        this.app.use( (req, res, next) => {
+            this.app.locals.isLogin = true;
+            this.app.locals.req_path = req.path;
+            next();
+        });
+    }
+
+    getRouting() {
+        this.app.use(require('./controllers'));
+    }
+
+    status404() {
+        this.app.use(( req, res, _ ) => {
+            res.stats(404).render('common/404.html');
+        });
+    }
+
+    errorHandler() {
+        this.app.use( (err, req, res, _ ) => {
+            res.status(500).render('common/500.html');
+        });
+    }
 }
 
-// admin 이하 모든 경로를 잡아감
-app.use('/admin', vipMiddleware, admin);
-
-app.use( (req, res, _) => {
-    res.status(400).render('common/404.html');
-});
-
-app.use( (req, res, _) => {
-    res.status(500).render('common/500.html');
-});
-
-
-app.listen(port, () => {
-    console.log('Express Listening on port', port);
-});
+module.exports = new App().app;
