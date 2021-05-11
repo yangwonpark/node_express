@@ -41,6 +41,15 @@ function vipMiddleware(req, res, next) {
 // admin 이하 모든 경로를 잡아감
 app.use('/admin', vipMiddleware, admin);
 
+app.use( (req, res, _) => {
+    res.status(400).render('common/404.html');
+});
+
+app.use( (req, res, _) => {
+    res.status(500).render('common/500.html');
+});
+
+
 app.listen(port, () => {
     console.log('Express Listening on port', port);
 });
